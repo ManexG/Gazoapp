@@ -1,11 +1,16 @@
+
 package com.example.gazoapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val VerdePrincipal = Color(0xFF176B45)
+val VerdeOscuro = Color(0xFF0F5132)
+val VerdeClaro = Color(0xFFD9EFE2)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val FondoClaro = Color(0xFFF7F9F7)
+val SuperficieClara = Color(0xFFFFFFFF)
+val TextoOscuro = Color(0xFF1B2921)
+
+val FondoOscuro = Color(0xFF111C16)
+val SuperficieOscura = Color(0xFF1C2B21)
+val TextoClaro = Color(0xFFE7F1E9)

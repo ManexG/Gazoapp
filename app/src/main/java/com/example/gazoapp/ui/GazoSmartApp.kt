@@ -15,6 +15,10 @@ fun GazoSmartApp() {
         mutableStateOf(Pantalla.INICIO)
     }
 
+    fun abrirPantalla(pantalla: Pantalla) {
+        pantallaActual = pantalla
+    }
+
     val estadoMenu = rememberDrawerState(
         initialValue = DrawerValue.Closed
     )
@@ -86,36 +90,70 @@ fun GazoSmartApp() {
                         }
                     }
                 )
-            }
-        ) { padding ->
+            },
 
+            floatingActionButton = {
+                if (pantallaActual == Pantalla.CATALOGO) {
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            abrirPantalla(Pantalla.FORMULARIO)
+                        },
+                        text = {
+                            Text("Agregar gasolinera")
+                        },
+                        icon = {
+                            Text(
+                                "+",
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                        }
+                    )
+                }
+            }
+
+        ) { padding ->
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
             ) {
+
                 Box(
                     modifier = Modifier.weight(1f)
                 ) {
                     when (pantallaActual) {
+
                         Pantalla.INICIO -> PantallaInicio()
+
                         Pantalla.CATALOGO -> PantallaCatalogo()
+
                         Pantalla.COMPARADOR -> PantallaComparador()
+
                         Pantalla.SERVICIO -> PantallaServicio()
+
                         Pantalla.SATURACION -> PantallaSaturacion()
+
                         Pantalla.CALCULADORA -> PantallaCalculadora()
+
                         Pantalla.RECOMENDACIONES -> PantallaRecomendaciones()
-                        Pantalla.FORMULARIO -> PantallaFormulario()
+
+                        Pantalla.FORMULARIO -> PantallaFormulario(
+                            onRegresar = {
+                                abrirPantalla(Pantalla.CATALOGO)
+                            }
+                        )
                     }
                 }
 
                 Text(
-                    text = "Datos ficticios y temporales. Se pierden al cerrar la app.",
+                    text = "",
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(12.dp)
                 )
             }
         }
+
+
     }
 }

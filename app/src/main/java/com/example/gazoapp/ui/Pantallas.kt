@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.gazoapp.ui.components.TarjetaGasolinera
 
 @Composable
 fun PantallaInicio() {
@@ -50,13 +51,40 @@ fun PantallaInicio() {
     }
 }
 
+
 @Composable
 fun PantallaCatalogo() {
-    PantallaEnConstruccion(
-        "Catálogo de gasolineras",
-        "Aquí se mostrarán las estaciones, sus precios y filtros."
-    )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            "Catálogo de gasolineras",
+            style = MaterialTheme.typography.headlineSmall
+        )
+
+        Text("Ejemplo visual con datos ficticios")
+
+        TarjetaGasolinera(
+            nombre = "Estación Centro",
+            municipio = "Zitácuaro",
+            precioRegular = 23.50,
+            activa = true,
+            onClick = {}
+        )
+
+        TarjetaGasolinera(
+            nombre = "Gasolinera Norte",
+            municipio = "Morelia",
+            precioRegular = 24.20,
+            activa = false,
+            onClick = {}
+        )
+    }
 }
+
 
 @Composable
 fun PantallaComparador() {
@@ -98,13 +126,51 @@ fun PantallaRecomendaciones() {
     )
 }
 
+
 @Composable
-fun PantallaFormulario() {
-    PantallaEnConstruccion(
-        "Registro de gasolineras",
-        "Aquí estará el formulario para agregar o modificar estaciones."
-    )
+fun PantallaFormulario(
+    onRegresar: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+
+        Text(
+            "Registro de gasolineras",
+            style = MaterialTheme.typography.headlineSmall
+        )
+
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    "Aquí estará el formulario para " +
+                            "registrar y modificar gasolineras."
+                )
+
+                Text(
+                    "Módulo en desarrollo",
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
+        OutlinedButton(
+            onClick = onRegresar,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Volver al catálogo")
+        }
+    }
 }
+
 
 @Composable
 fun PantallaEnConstruccion(
