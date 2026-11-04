@@ -89,41 +89,31 @@ fun GazoSmartApp() {
             }
         ) { padding ->
 
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(16.dp)
             ) {
+                Box(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    when (pantallaActual) {
+                        Pantalla.INICIO -> PantallaInicio()
+                        Pantalla.CATALOGO -> PantallaCatalogo()
+                        Pantalla.COMPARADOR -> PantallaComparador()
+                        Pantalla.SERVICIO -> PantallaServicio()
+                        Pantalla.SATURACION -> PantallaSaturacion()
+                        Pantalla.CALCULADORA -> PantallaCalculadora()
+                        Pantalla.RECOMENDACIONES -> PantallaRecomendaciones()
+                        Pantalla.FORMULARIO -> PantallaFormulario()
+                    }
+                }
 
                 Text(
-                    text = "GazoSmart",
-                    style = MaterialTheme.typography.headlineSmall
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    text = "Pantalla: ${pantallaActual.titulo}",
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "Esta sección está en desarrollo."
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                HorizontalDivider()
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Text(
-                    text = "Datos ficticios almacenados en memoria. " +
-                            "Se pierden al cerrar definitivamente la aplicación.",
-                    style = MaterialTheme.typography.bodySmall
+                    text = "Datos ficticios y temporales. Se pierden al cerrar la app.",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(12.dp)
                 )
             }
         }
