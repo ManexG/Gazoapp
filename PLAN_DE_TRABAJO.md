@@ -54,8 +54,8 @@ com.example.gazoapp
 - [x] `enum` TipoCombustible (Regular/Premium/Diésel) y NivelSaturacion (Baja 0–2, Media 3–5, Alta 6+), con `desdeVehiculosEnEspera`.
 - [x] `data class` CargaCombustible y RegistroPrecio (modelos de la mejora de innovación).
 - [x] `ArregloFijo<T>` con capacidad, conteo observable y búsqueda/eliminación por predicado.
-- [ ] `GazoRepository`: CRUD de estaciones, alta de evaluaciones/reportes/cargas/registros de precio (validando que la estación exista, regla 6), eliminación en cascada, IDs no reutilizables. Debe generar un `RegistroPrecio` automáticamente al crear una estación o modificar uno de sus precios.
-- [ ] `DatosPrueba`: ~8–10 estaciones ficticias incluyendo A/B/C del README §1, un empate de mínimo, una inactiva, una sin evaluaciones, una con un solo combustible, más algunas cargas e historial de precio de ejemplo.
+- [x] `GazoRepository`: CRUD de estaciones, alta de evaluaciones/reportes/cargas/registros de precio (validando que la estación exista, regla 6), eliminación en cascada, IDs no reutilizables. Debe generar un `RegistroPrecio` automáticamente al crear una estación o modificar uno de sus precios.
+- [x] `DatosPrueba`: ~8–10 estaciones ficticias incluyendo A/B/C del README §1, un empate de mínimo, una inactiva, una sin evaluaciones, una con un solo combustible, más algunas cargas e historial de precio de ejemplo.
 
 ### Fase 2 – Lógica pura (1.5 días) — base de los casos de prueba
 - [ ] `Validaciones`: obligatorios, precios > 0, al menos un combustible, distancia ≥ 0, litros/rendimiento > 0, esperas ≥ 0.

@@ -1,13 +1,10 @@
 package com.example.gazoapp.data
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
-/**
- * Arreglo de capacidad fija cuyo conteo es estado observable de Compose, para
- * que la UI nunca quede desactualizada tras agregar o eliminar elementos.
- */
 class ArregloFijo<T>(private val capacidad: Int) {
 
     private val elementos = arrayOfNulls<Any?>(capacidad)
