@@ -43,6 +43,10 @@ fun PantallaCatalogo(
         mutableStateOf(FiltroEstado.ACTIVAS)
     }
 
+    var filtrosExpandido by remember {
+        mutableStateOf(false)
+    }
+
     var estacionEliminar by remember {
         mutableStateOf<Gasolinera?>(null)
     }
@@ -105,135 +109,214 @@ fun PantallaCatalogo(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // FILTRO DE ESTADO
-        Text(
-            text = "Estado de la estación",
-            style = MaterialTheme.typography.titleSmall
-        )
+        // FILTROS (menú desplegable para no ocupar tanto espacio en pantalla)
+        val filtrosActivos = listOfNotNull(
+            if (filtroEstado != FiltroEstado.ACTIVAS) true else null,
+            combustibleSeleccionado?.let { true },
+            nivelSeleccionado?.let { true }
+        ).size
 
-        Row(
-            modifier = Modifier.horizontalScroll(
-                rememberScrollState()
-            ),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        Box {
 
-            FilterChip(
-                selected = filtroEstado == FiltroEstado.ACTIVAS,
+            OutlinedButton(
                 onClick = {
-                    filtroEstado = FiltroEstado.ACTIVAS
+                    filtrosExpandido = true
                 },
-                label = {
-                    Text("Activas")
-                }
-            )
-
-            FilterChip(
-                selected = filtroEstado == FiltroEstado.INACTIVAS,
-                onClick = {
-                    filtroEstado = FiltroEstado.INACTIVAS
-                },
-                label = {
-                    Text("Inactivas")
-                }
-            )
-
-            FilterChip(
-                selected = filtroEstado == FiltroEstado.TODAS,
-                onClick = {
-                    filtroEstado = FiltroEstado.TODAS
-                },
-                label = {
-                    Text("Todas")
-                }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // FILTRO DE COMBUSTIBLE
-        Text(
-            text = "Tipo de combustible",
-            style = MaterialTheme.typography.titleSmall
-        )
-
-        Row(
-            modifier = Modifier.horizontalScroll(
-                rememberScrollState()
-            ),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-
-            FilterChip(
-                selected = combustibleSeleccionado == null,
-                onClick = {
-                    combustibleSeleccionado = null
-                },
-                label = {
-                    Text("Todos")
-                }
-            )
-
-            TipoCombustible.entries.forEach { tipo ->
-
-                FilterChip(
-                    selected = combustibleSeleccionado == tipo,
-                    onClick = {
-                        combustibleSeleccionado =
-                            if (combustibleSeleccionado == tipo) {
-                                null
-                            } else {
-                                tipo
-                            }
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = if (filtrosActivos > 0) {
+                        "Filtros ($filtrosActivos)"
+                    } else {
+                        "Filtros"
                     },
-                    label = {
-                        Text(tipo.etiqueta)
-                    }
+                    modifier = Modifier.weight(1f)
                 )
+
+                Text(if (filtrosExpandido) "▲" else "▼")
             }
-        }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // FILTRO DE SATURACIÓN
-        Text(
-            text = "Nivel de saturación",
-            style = MaterialTheme.typography.titleSmall
-        )
-
-        Row(
-            modifier = Modifier.horizontalScroll(
-                rememberScrollState()
-            ),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-
-            FilterChip(
-                selected = nivelSeleccionado == null,
-                onClick = {
-                    nivelSeleccionado = null
+            DropdownMenu(
+                expanded = filtrosExpandido,
+                onDismissRequest = {
+                    filtrosExpandido = false
                 },
-                label = {
-                    Text("Todos")
-                }
-            )
+                modifier = Modifier.fillMaxWidth(0.92f)
+            ) {
 
-            NivelSaturacion.entries.forEach { nivel ->
+                Column(
+                    modifier = Modifier.padding(
+                        horizontal = 12.dp,
+                        vertical = 4.dp
+                    )
+                ) {
 
-                FilterChip(
-                    selected = nivelSeleccionado == nivel,
-                    onClick = {
-                        nivelSeleccionado =
-                            if (nivelSeleccionado == nivel) {
-                                null
-                            } else {
-                                nivel
+                    // FILTRO DE ESTADO
+                    Text(
+                        text = "Estado de la estación",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        modifier = Modifier.horizontalScroll(
+                            rememberScrollState()
+                        ),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+
+                        FilterChip(
+                            selected = filtroEstado == FiltroEstado.ACTIVAS,
+                            onClick = {
+                                filtroEstado = FiltroEstado.ACTIVAS
+                            },
+                            label = {
+                                Text("Activas")
                             }
-                    },
-                    label = {
-                        Text(nivel.etiqueta)
+                        )
+
+                        FilterChip(
+                            selected = filtroEstado == FiltroEstado.INACTIVAS,
+                            onClick = {
+                                filtroEstado = FiltroEstado.INACTIVAS
+                            },
+                            label = {
+                                Text("Inactivas")
+                            }
+                        )
+
+                        FilterChip(
+                            selected = filtroEstado == FiltroEstado.TODAS,
+                            onClick = {
+                                filtroEstado = FiltroEstado.TODAS
+                            },
+                            label = {
+                                Text("Todas")
+                            }
+                        )
                     }
-                )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // FILTRO DE COMBUSTIBLE
+                    Text(
+                        text = "Tipo de combustible",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        modifier = Modifier.horizontalScroll(
+                            rememberScrollState()
+                        ),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+
+                        FilterChip(
+                            selected = combustibleSeleccionado == null,
+                            onClick = {
+                                combustibleSeleccionado = null
+                            },
+                            label = {
+                                Text("Todos")
+                            }
+                        )
+
+                        TipoCombustible.entries.forEach { tipo ->
+
+                            FilterChip(
+                                selected = combustibleSeleccionado == tipo,
+                                onClick = {
+                                    combustibleSeleccionado =
+                                        if (combustibleSeleccionado == tipo) {
+                                            null
+                                        } else {
+                                            tipo
+                                        }
+                                },
+                                label = {
+                                    Text(tipo.etiqueta)
+                                }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // FILTRO DE SATURACIÓN
+                    Text(
+                        text = "Nivel de saturación",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        modifier = Modifier.horizontalScroll(
+                            rememberScrollState()
+                        ),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+
+                        FilterChip(
+                            selected = nivelSeleccionado == null,
+                            onClick = {
+                                nivelSeleccionado = null
+                            },
+                            label = {
+                                Text("Todos")
+                            }
+                        )
+
+                        NivelSaturacion.entries.forEach { nivel ->
+
+                            FilterChip(
+                                selected = nivelSeleccionado == nivel,
+                                onClick = {
+                                    nivelSeleccionado =
+                                        if (nivelSeleccionado == nivel) {
+                                            null
+                                        } else {
+                                            nivel
+                                        }
+                                },
+                                label = {
+                                    Text(nivel.etiqueta)
+                                }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    HorizontalDivider()
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        TextButton(
+                            onClick = {
+                                filtroEstado = FiltroEstado.ACTIVAS
+                                combustibleSeleccionado = null
+                                nivelSeleccionado = null
+                            }
+                        ) {
+                            Text("Limpiar filtros")
+                        }
+
+                        TextButton(
+                            onClick = {
+                                filtrosExpandido = false
+                            }
+                        ) {
+                            Text("Cerrar")
+                        }
+                    }
+                }
             }
         }
 
