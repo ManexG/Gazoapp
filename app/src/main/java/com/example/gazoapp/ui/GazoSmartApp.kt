@@ -147,9 +147,9 @@ fun GazoSmartApp(repositorio: GazoRepository) {
 
                         Pantalla.SATURACION -> PantallaSaturacion(repositorio)
 
-                        Pantalla.CALCULADORA -> PantallaCalculadora()
+                        Pantalla.CALCULADORA -> PantallaCalculadora(repositorio)
 
-                        Pantalla.RECOMENDACIONES -> PantallaRecomendaciones()
+                        Pantalla.RECOMENDACIONES -> PantallaRecomendaciones(repositorio)
 
                         Pantalla.MIS_CARGAS -> PantallaMisCargas()
 

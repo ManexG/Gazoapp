@@ -2,6 +2,7 @@
 package com.example.gazoapp.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,7 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.gazoapp.data.GazoRepository
+import com.example.gazoapp.logic.Costos
+import com.example.gazoapp.logic.CriterioRecomendacion
 import com.example.gazoapp.logic.Estadisticas
+import com.example.gazoapp.logic.Recomendador
 import com.example.gazoapp.logic.ResultadoExtremo
 import com.example.gazoapp.logic.Tiempo
 import com.example.gazoapp.logic.Validaciones
@@ -740,19 +744,224 @@ private fun FormularioReporteSaturacion(
 }
 
 @Composable
-fun PantallaCalculadora() {
-    PantallaEnConstruccion(
-        "Calculadora",
-        "Aquí se calcularán los costos de carga y desplazamiento."
-    )
+fun PantallaCalculadora(repositorio: GazoRepository) {
+    var modo by remember { mutableStateOf(ModoCalculadora.CARGA_SIMPLE) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("Calculadora", style = MaterialTheme.typography.headlineSmall)
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(
+                selected = modo == ModoCalculadora.CARGA_SIMPLE,
+                onClick = { modo = ModoCalculadora.CARGA_SIMPLE },
+                label = { Text("Carga simple") }
+            )
+            FilterChip(
+                selected = modo == ModoCalculadora.COMPARADOR_DESVIOS,
+                onClick = { modo = ModoCalculadora.COMPARADOR_DESVIOS },
+                label = { Text("Comparador de desvíos") }
+            )
+        }
+
+        Box(modifier = Modifier.weight(1f)) {
+            when (modo) {
+                ModoCalculadora.CARGA_SIMPLE -> CalculadoraCargaSimple()
+                ModoCalculadora.COMPARADOR_DESVIOS -> ComparadorDesvios(repositorio)
+            }
+        }
+    }
+}
+
+private enum class ModoCalculadora { CARGA_SIMPLE, COMPARADOR_DESVIOS }
+
+/** RF-09: litros x precio por litro. */
+@Composable
+private fun CalculadoraCargaSimple() {
+    var litrosTexto by remember { mutableStateOf("") }
+    var precioTexto by remember { mutableStateOf("") }
+
+    val litros = litrosTexto.toDoubleOrNull()
+    val precio = precioTexto.toDoubleOrNull()
+    val costo = if (litros != null && litros > 0 && precio != null && precio > 0) {
+        Costos.costoCarga(litros, precio)
+    } else null
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        CampoNumerico(litrosTexto, { litrosTexto = it }, "Litros")
+        CampoNumerico(precioTexto, { precioTexto = it }, "Precio por litro (MXN)")
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text("Costo de la carga", style = MaterialTheme.typography.titleMedium)
+                if (costo != null) {
+                    Text("$%.2f MXN".format(costo), style = MaterialTheme.typography.headlineSmall)
+                } else {
+                    Text("Ingresa litros y precio válidos (mayores a cero).")
+                }
+            }
+        }
+    }
+}
+
+/** RF-10: comparador de desvíos ordenado por costo total, excluyendo inactivas/sin precio. */
+@Composable
+private fun ComparadorDesvios(repositorio: GazoRepository) {
+    var tipoSeleccionado by remember { mutableStateOf(TipoCombustible.REGULAR) }
+    var litrosTexto by remember { mutableStateOf("") }
+    var rendimientoTexto by remember { mutableStateOf("") }
+
+    val litros = litrosTexto.toDoubleOrNull()
+    val rendimiento = rendimientoTexto.toDoubleOrNull()
+    val resultados = if (litros != null && litros > 0 && rendimiento != null && rendimiento > 0) {
+        Costos.compararEstaciones(repositorio.gasolineras(), tipoSeleccionado, litros, rendimiento)
+    } else null
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TipoCombustible.entries.forEach { tipo ->
+                FilterChip(
+                    selected = tipo == tipoSeleccionado,
+                    onClick = { tipoSeleccionado = tipo },
+                    label = { Text(tipo.etiqueta) }
+                )
+            }
+        }
+
+        CampoNumerico(litrosTexto, { litrosTexto = it }, "Litros necesarios")
+        CampoNumerico(rendimientoTexto, { rendimientoTexto = it }, "Rendimiento (km/L)")
+
+        Text(
+            "Supuesto: el desvío se recorre de ida y vuelta, el rendimiento es constante y " +
+                "se usa el precio de la propia estación. No se consideran desgaste, peajes ni valor del tiempo.",
+            style = MaterialTheme.typography.bodySmall
+        )
+
+        when {
+            resultados == null -> EstadoVacio("Ingresa litros y rendimiento válidos (mayores a cero).")
+            resultados.isEmpty() -> EstadoVacio("No hay estaciones activas con precio de ${tipoSeleccionado.etiqueta} disponible")
+            else -> LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(resultados) { resultado ->
+                    Card(modifier = Modifier.fillMaxWidth()) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(resultado.gasolinera.nombre, style = MaterialTheme.typography.titleMedium)
+                                Text("$%.2f".format(resultado.costoTotal), style = MaterialTheme.typography.titleMedium)
+                            }
+                            Text("Carga: $%.2f · Desvío: $%.2f".format(resultado.costoCarga, resultado.costoExtraDesvio))
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
-fun PantallaRecomendaciones() {
-    PantallaEnConstruccion(
-        "Recomendaciones",
-        "Aquí se sugerirán gasolineras según el criterio elegido."
+fun PantallaRecomendaciones(repositorio: GazoRepository) {
+    var criterio by remember { mutableStateOf(CriterioRecomendacion.MENOR_PRECIO) }
+    var tipoSeleccionado by remember { mutableStateOf(TipoCombustible.REGULAR) }
+    var litrosTexto by remember { mutableStateOf("") }
+    var rendimientoTexto by remember { mutableStateOf("") }
+
+    val necesitaTipo = criterio == CriterioRecomendacion.MENOR_PRECIO || criterio == CriterioRecomendacion.MENOR_COSTO_ESTIMADO
+    val necesitaCosto = criterio == CriterioRecomendacion.MENOR_COSTO_ESTIMADO
+
+    val recomendacion = Recomendador.recomendar(
+        criterio = criterio,
+        gasolineras = repositorio.gasolineras(),
+        evaluaciones = repositorio.evaluaciones(),
+        reportes = repositorio.reportes(),
+        tipo = if (necesitaTipo) tipoSeleccionado else null,
+        litrosNecesarios = litrosTexto.toDoubleOrNull(),
+        rendimientoKmPorLitro = rendimientoTexto.toDoubleOrNull()
     )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("Recomendaciones", style = MaterialTheme.typography.headlineSmall)
+
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            CriterioRecomendacion.entries.forEach { opcion ->
+                FilterChip(
+                    selected = opcion == criterio,
+                    onClick = { criterio = opcion },
+                    label = { Text(textoCriterio(opcion)) }
+                )
+            }
+        }
+
+        if (necesitaTipo) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TipoCombustible.entries.forEach { tipo ->
+                    FilterChip(
+                        selected = tipo == tipoSeleccionado,
+                        onClick = { tipoSeleccionado = tipo },
+                        label = { Text(tipo.etiqueta) }
+                    )
+                }
+            }
+        }
+
+        if (necesitaCosto) {
+            CampoNumerico(litrosTexto, { litrosTexto = it }, "Litros necesarios")
+            CampoNumerico(rendimientoTexto, { rendimientoTexto = it }, "Rendimiento (km/L)")
+        }
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text("Resultado", style = MaterialTheme.typography.titleMedium)
+                if (recomendacion != null) {
+                    Text(recomendacion.gasolinera.nombre, style = MaterialTheme.typography.headlineSmall)
+                    Text(recomendacion.explicacion)
+                } else {
+                    Text("Datos insuficientes para esta recomendación.")
+                }
+            }
+        }
+    }
+}
+
+private fun textoCriterio(criterio: CriterioRecomendacion): String = when (criterio) {
+    CriterioRecomendacion.MENOR_PRECIO -> "Menor precio"
+    CriterioRecomendacion.MENOR_COSTO_ESTIMADO -> "Menor costo estimado"
+    CriterioRecomendacion.MEJOR_ATENCION -> "Mejor atención"
+    CriterioRecomendacion.MENOR_ESPERA -> "Menor espera"
 }
 
 @Composable
