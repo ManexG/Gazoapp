@@ -126,6 +126,22 @@ fun PantallaRecomendaciones() {
     )
 }
 
+@Composable
+fun PantallaMisCargas() {
+    PantallaEnConstruccion(
+        "Mis cargas",
+        "Aquí se registrarán tus abastecimientos ficticios y el gasto acumulado."
+    )
+}
+
+@Composable
+fun PantallaHistorialPrecios() {
+    PantallaEnConstruccion(
+        "Historial de precios",
+        "Aquí se mostrará la tendencia de precios de una estación a lo largo del tiempo."
+    )
+}
+
 
 @Composable
 fun PantallaFormulario(

@@ -45,7 +45,9 @@ fun GazoSmartApp(repositorio: GazoRepository) {
         Pantalla.SERVICIO,
         Pantalla.SATURACION,
         Pantalla.CALCULADORA,
-        Pantalla.RECOMENDACIONES
+        Pantalla.RECOMENDACIONES,
+        Pantalla.MIS_CARGAS,
+        Pantalla.HISTORIAL_PRECIOS
     )
 
     ModalNavigationDrawer(

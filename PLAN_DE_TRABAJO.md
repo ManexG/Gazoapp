@@ -67,10 +67,10 @@ com.example.gazoapp
 - [x] **Tests unitarios JUnit** de esta capa (cubren casos 2, 3, 7, 8, 9, 10, 12–14, 17 del README §11; 45 tests, 0 fallos).
 
 ### Fase 3 – Esqueleto de UI y navegación (1 día)
-- [ ] `Scaffold` + `TopAppBar` + `ModalNavigationDrawer` con las 10 pantallas (8 base + Mis cargas + Historial de precios).
-- [ ] Aviso visible: "Datos ficticios/en memoria; se pierden al cerrar la app".
-- [ ] Componentes reutilizables (tarjeta, estado vacío, diálogo de confirmación, campo numérico con error).
-- [ ] Tema Material3 con foco en accesibilidad (contraste, tamaños táctiles, uso a una mano: FAB abajo).
+- [x] `Scaffold` + `TopAppBar` + `ModalNavigationDrawer` con las 10 pantallas (8 base + Mis cargas + Historial de precios).
+- [x] Aviso visible: "Datos ficticios/en memoria; se pierden al cerrar la app".
+- [x] Componentes reutilizables (tarjeta, estado vacío, diálogo de confirmación, campo numérico con error).
+- [x] Tema Material3 con foco en accesibilidad (contraste, tamaños táctiles, uso a una mano: FAB abajo). Pendiente menor para Fase 7: el ícono del menú usa `Text("☰")` en vez de `Icon` con `contentDescription`.
 
 ### Fase 4 – Pantallas CRUD (2 días)
 - [ ] **Catálogo** (RF-02, RF-05): `LazyColumn` + `Card`, búsqueda insensible a mayúsculas (nombre/municipio), filtros por combustible, estado y nivel de saturación; "Sin evaluaciones"/"Sin reporte reciente".
