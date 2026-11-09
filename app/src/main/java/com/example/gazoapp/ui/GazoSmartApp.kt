@@ -28,6 +28,16 @@ fun GazoSmartApp(repositorio: GazoRepository) {
         mutableStateOf<Int?>(null)
     }
 
+    // Estación preseleccionada al entrar a Mis cargas / Historial de precios
+    // desde el Detalle; null cuando se entra desde el menú principal.
+    var cargasPreseleccionId by remember {
+        mutableStateOf<Int?>(null)
+    }
+
+    var historialPreseleccionId by remember {
+        mutableStateOf<Int?>(null)
+    }
+
     fun abrirPantalla(pantalla: Pantalla) {
         pantallaActual = pantalla
     }
@@ -82,6 +92,14 @@ fun GazoSmartApp(repositorio: GazoRepository) {
                         selected = pantallaActual == pantalla,
 
                         onClick = {
+                            if (pantalla == Pantalla.MIS_CARGAS) {
+                                cargasPreseleccionId = null
+                            }
+
+                            if (pantalla == Pantalla.HISTORIAL_PRECIOS) {
+                                historialPreseleccionId = null
+                            }
+
                             pantallaActual = pantalla
 
                             scope.launch {
@@ -200,9 +218,15 @@ fun GazoSmartApp(repositorio: GazoRepository) {
 
                         Pantalla.RECOMENDACIONES -> PantallaRecomendaciones(repositorio)
 
-                        Pantalla.MIS_CARGAS -> PantallaMisCargas()
+                        Pantalla.MIS_CARGAS -> PantallaMisCargas(
+                            repositorio = repositorio,
+                            gasolineraPreseleccionadaId = cargasPreseleccionId
+                        )
 
-                        Pantalla.HISTORIAL_PRECIOS -> PantallaHistorialPrecios()
+                        Pantalla.HISTORIAL_PRECIOS -> PantallaHistorialPrecios(
+                            repositorio = repositorio,
+                            gasolineraPreseleccionadaId = historialPreseleccionId
+                        )
 
                         // FORMULARIO DE REGISTRO Y EDICIÓN
                         Pantalla.FORMULARIO -> {
@@ -258,6 +282,16 @@ fun GazoSmartApp(repositorio: GazoRepository) {
                                         gasolineraDetalleId = null
 
                                         abrirPantalla(Pantalla.CATALOGO)
+                                    },
+
+                                    onVerCargas = { idEstacion ->
+                                        cargasPreseleccionId = idEstacion
+                                        abrirPantalla(Pantalla.MIS_CARGAS)
+                                    },
+
+                                    onVerHistorial = { idEstacion ->
+                                        historialPreseleccionId = idEstacion
+                                        abrirPantalla(Pantalla.HISTORIAL_PRECIOS)
                                     }
                                 )
 

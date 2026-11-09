@@ -87,9 +87,9 @@ com.example.gazoapp
 - [x] **Recomendaciones** (RF-11): selector de criterio + estación sugerida + explicación.
 
 ### Fase 6 – Reto de innovación: Mis cargas + Historial de precios (1 día)
-- [ ] **Mis cargas**: formulario (estación, combustible, litros, precio, fecha) con validaciones (litros y precio > 0); lista cronológica de cargas propias con costo total por registro y acumulado; bloqueo al llenarse la capacidad del arreglo.
-- [ ] **Historial de precios**: generación automática de `RegistroPrecio` desde el repositorio al crear/editar precios; pantalla con lista cronológica por estación y combustible, indicando subida/bajada respecto al registro anterior; estado vacío "Sin historial" cuando solo exista un registro.
-- [ ] Enlazar ambas pantallas desde el Detalle de la estación y desde el menú principal.
+- [x] **Mis cargas**: formulario (estación, combustible, litros, precio, fecha) con validaciones (litros y precio > 0); lista cronológica de cargas propias con costo total por registro y acumulado; bloqueo al llenarse la capacidad del arreglo.
+- [x] **Historial de precios**: generación automática de `RegistroPrecio` desde el repositorio al crear/editar precios; pantalla con lista cronológica por estación y combustible, indicando subida/bajada respecto al registro anterior; estado vacío "Sin historial" cuando solo exista un registro.
+- [x] Enlazar ambas pantallas desde el Detalle de la estación y desde el menú principal.
 
 ### Fase 7 – Pruebas y pulido (1.5 días)
 - [ ] Ejecutar los 17 casos mínimos del README §11 y registrar entrada / esperado / obtenido (tabla para el entregable 5).

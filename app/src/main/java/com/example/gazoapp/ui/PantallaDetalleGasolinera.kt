@@ -20,7 +20,9 @@ fun PantallaDetalleGasolinera(
     gasolineraId: Int,
     onEditar: (Int) -> Unit,
     onEliminar: () -> Unit,
-    onRegresar: () -> Unit
+    onRegresar: () -> Unit,
+    onVerCargas: (Int) -> Unit = {},
+    onVerHistorial: (Int) -> Unit = {}
 ) {
 
     val estacion = repositorio.buscarGasolinera(gasolineraId)
@@ -300,6 +302,31 @@ fun PantallaDetalleGasolinera(
                         }"
                     )
                 }
+            }
+        }
+
+        // MEJORAS DE INNOVACIÓN: MIS CARGAS E HISTORIAL DE PRECIOS
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+
+            OutlinedButton(
+                onClick = {
+                    onVerCargas(estacion.id)
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Mis cargas")
+            }
+
+            OutlinedButton(
+                onClick = {
+                    onVerHistorial(estacion.id)
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Historial de precios")
             }
         }
 

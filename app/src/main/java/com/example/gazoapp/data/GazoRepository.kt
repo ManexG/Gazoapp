@@ -398,6 +398,9 @@ class GazoRepository {
             it.gasolineraId == gasolineraId
         }
 
+    fun cargasLlenas(): Boolean =
+        cargas.lleno
+
     fun agregarCargaCombustible(
         gasolineraId: Int,
         tipoCombustible: TipoCombustible,
