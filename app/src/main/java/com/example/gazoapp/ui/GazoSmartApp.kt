@@ -5,11 +5,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.gazoapp.data.GazoRepository
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GazoSmartApp() {
+fun GazoSmartApp(repositorio: GazoRepository) {
 
     var pantallaActual by remember {
         mutableStateOf(Pantalla.INICIO)
@@ -126,7 +127,10 @@ fun GazoSmartApp() {
                 ) {
                     when (pantallaActual) {
 
-                        Pantalla.INICIO -> PantallaInicio()
+                        Pantalla.INICIO -> PantallaInicio(
+                            repositorio = repositorio,
+                            onNavegar = { abrirPantalla(it) }
+                        )
 
                         Pantalla.CATALOGO -> PantallaCatalogo()
 

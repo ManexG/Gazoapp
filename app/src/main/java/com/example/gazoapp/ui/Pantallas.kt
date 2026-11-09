@@ -8,10 +8,35 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.gazoapp.data.GazoRepository
+import com.example.gazoapp.logic.Estadisticas
+import com.example.gazoapp.logic.ResultadoExtremo
+import com.example.gazoapp.model.TipoCombustible
 import com.example.gazoapp.ui.components.TarjetaGasolinera
 
+private fun textoExtremo(resultado: ResultadoExtremo?): String {
+    if (resultado == null) return "Sin datos"
+    val nombres = resultado.estaciones.joinToString(", ") { it.nombre }
+    return "$%.2f ($nombres)".format(resultado.valor)
+}
+
+private fun textoPromedio(promedio: Double?): String =
+    if (promedio == null) "Sin datos" else "$%.2f".format(promedio)
+
+/** Panel estadístico (RF-12): totales, mín/máx/promedio por combustible y mejor evaluada. */
 @Composable
-fun PantallaInicio() {
+fun PantallaInicio(
+    repositorio: GazoRepository,
+    onNavegar: (Pantalla) -> Unit
+) {
+    val gasolineras = repositorio.gasolineras()
+    val evaluaciones = repositorio.evaluaciones()
+    val activas = gasolineras.count { it.activa }
+    val mejorEvaluada = Estadisticas.estacionMejorEvaluada(gasolineras, evaluaciones)
+    val promedioMejorEvaluada = mejorEvaluada?.let {
+        Estadisticas.promedioEvaluacionesDeEstacion(it.id, evaluaciones)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -30,23 +55,69 @@ fun PantallaInicio() {
         )
 
         Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Text(
                     "Gasolineras registradas",
                     style = MaterialTheme.typography.titleMedium
                 )
-                Text("Sin datos todavía")
+                Text("${gasolineras.size} en total, $activas activas")
+            }
+        }
+
+        TipoCombustible.entries.forEach { tipo ->
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(tipo.etiqueta, style = MaterialTheme.typography.titleMedium)
+                    Text("Mínimo: ${textoExtremo(Estadisticas.precioMinimo(gasolineras, tipo))}")
+                    Text("Máximo: ${textoExtremo(Estadisticas.precioMaximo(gasolineras, tipo))}")
+                    Text("Promedio: ${textoPromedio(Estadisticas.precioPromedio(gasolineras, tipo))}")
+                }
             }
         }
 
         Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    "Estaciones activas",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text("Sin datos todavía")
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text("Estación mejor evaluada", style = MaterialTheme.typography.titleMedium)
+                if (mejorEvaluada != null && promedioMejorEvaluada != null) {
+                    Text(mejorEvaluada.nombre)
+                    Text("Promedio de evaluación: %.2f sobre 5".format(promedioMejorEvaluada))
+                } else {
+                    Text("Sin datos suficientes")
+                }
             }
+        }
+
+        Text("Accesos rápidos", style = MaterialTheme.typography.titleMedium)
+
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = { onNavegar(Pantalla.CATALOGO) },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Ver catálogo de gasolineras") }
+
+            OutlinedButton(
+                onClick = { onNavegar(Pantalla.COMPARADOR) },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Comparar precios") }
+
+            OutlinedButton(
+                onClick = { onNavegar(Pantalla.CALCULADORA) },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Calcular costo de carga") }
+
+            OutlinedButton(
+                onClick = { onNavegar(Pantalla.RECOMENDACIONES) },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Pedir una recomendación") }
         }
     }
 }
