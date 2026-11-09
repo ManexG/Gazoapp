@@ -9,5 +9,7 @@ enum class Pantalla(val titulo: String) {
     SATURACION("Saturación"),
     CALCULADORA("Calculadora"),
     RECOMENDACIONES("Recomendaciones"),
+    MIS_CARGAS("Mis cargas"),
+    HISTORIAL_PRECIOS("Historial de precios"),
     FORMULARIO("Registro de gasolineras")
 }

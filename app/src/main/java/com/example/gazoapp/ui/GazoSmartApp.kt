@@ -32,7 +32,9 @@ fun GazoSmartApp() {
         Pantalla.SERVICIO,
         Pantalla.SATURACION,
         Pantalla.CALCULADORA,
-        Pantalla.RECOMENDACIONES
+        Pantalla.RECOMENDACIONES,
+        Pantalla.MIS_CARGAS,
+        Pantalla.HISTORIAL_PRECIOS
     )
 
     ModalNavigationDrawer(
@@ -138,6 +140,10 @@ fun GazoSmartApp() {
 
                         Pantalla.RECOMENDACIONES -> PantallaRecomendaciones()
 
+                        Pantalla.MIS_CARGAS -> PantallaMisCargas()
+
+                        Pantalla.HISTORIAL_PRECIOS -> PantallaHistorialPrecios()
+
                         Pantalla.FORMULARIO -> PantallaFormulario(
                             onRegresar = {
                                 abrirPantalla(Pantalla.CATALOGO)
@@ -147,7 +153,7 @@ fun GazoSmartApp() {
                 }
 
                 Text(
-                    text = "",
+                    text = "Datos ficticios/en memoria; se pierden al cerrar la app.",
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(12.dp)
                 )
