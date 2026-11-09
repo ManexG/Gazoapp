@@ -48,7 +48,10 @@ object Recomendador {
         val empate = if (resultado.estaciones.size > 1) {
             " (empatada con ${resultado.estaciones.size - 1} estación(es) más)"
         } else ""
-        return Recomendacion(estacion, "Precio más bajo de ${tipo.etiqueta}: $${resultado.valor} por litro$empate.")
+        return Recomendacion(
+            estacion,
+            "Precio más bajo de ${tipo.etiqueta}: $%.2f por litro%s.".format(resultado.valor, empate)
+        )
     }
 
     private fun recomendarPorMenorCosto(
@@ -62,7 +65,7 @@ object Recomendador {
             .firstOrNull() ?: return null
         return Recomendacion(
             mejor.gasolinera,
-            "Menor costo total estimado para ${tipo.etiqueta}: $${mejor.costoTotal} (carga + desvío)."
+            "Menor costo total estimado para ${tipo.etiqueta}: $%.2f (carga + desvío).".format(mejor.costoTotal)
         )
     }
 

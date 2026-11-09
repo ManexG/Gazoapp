@@ -1,6 +1,7 @@
 
 package com.example.gazoapp.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -29,6 +30,12 @@ fun GazoSmartApp(repositorio: GazoRepository) {
 
     fun abrirPantalla(pantalla: Pantalla) {
         pantallaActual = pantalla
+    }
+
+    // Botón/gesto nativo de retroceso: vuelve a Inicio (o al Catálogo desde el
+    // formulario de alta) en vez de cerrar la app; en Inicio sí la cierra.
+    BackHandler(enabled = pantallaActual != Pantalla.INICIO) {
+        pantallaActual = if (pantallaActual == Pantalla.FORMULARIO) Pantalla.CATALOGO else Pantalla.INICIO
     }
 
     val estadoMenu = rememberDrawerState(
@@ -160,9 +167,10 @@ fun GazoSmartApp(repositorio: GazoRepository) {
 
                     when (pantallaActual) {
 
-                        Pantalla.INICIO -> {
-                            PantallaInicio()
-                        }
+                        Pantalla.INICIO -> PantallaInicio(
+                            repositorio = repositorio,
+                            onNavegar = { abrirPantalla(it) }
+                        )
 
                         // CATÁLOGO
                         Pantalla.CATALOGO -> {
@@ -182,25 +190,19 @@ fun GazoSmartApp(repositorio: GazoRepository) {
                             )
                         }
 
-                        Pantalla.COMPARADOR -> {
-                            PantallaComparador()
-                        }
+                        Pantalla.COMPARADOR -> PantallaComparador(repositorio)
 
-                        Pantalla.SERVICIO -> {
-                            PantallaServicio()
-                        }
+                        Pantalla.SERVICIO -> PantallaServicio(repositorio)
 
-                        Pantalla.SATURACION -> {
-                            PantallaSaturacion()
-                        }
+                        Pantalla.SATURACION -> PantallaSaturacion(repositorio)
 
-                        Pantalla.CALCULADORA -> {
-                            PantallaCalculadora()
-                        }
+                        Pantalla.CALCULADORA -> PantallaCalculadora(repositorio)
 
-                        Pantalla.RECOMENDACIONES -> {
-                            PantallaRecomendaciones()
-                        }
+                        Pantalla.RECOMENDACIONES -> PantallaRecomendaciones(repositorio)
+
+                        Pantalla.MIS_CARGAS -> PantallaMisCargas()
+
+                        Pantalla.HISTORIAL_PRECIOS -> PantallaHistorialPrecios()
 
                         // FORMULARIO DE REGISTRO Y EDICIÓN
                         Pantalla.FORMULARIO -> {
@@ -261,7 +263,10 @@ fun GazoSmartApp(repositorio: GazoRepository) {
 
                             } else {
 
-                                PantallaInicio()
+                                PantallaInicio(
+                                    repositorio = repositorio,
+                                    onNavegar = { abrirPantalla(it) }
+                                )
                             }
                         }
                     }

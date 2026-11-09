@@ -79,12 +79,12 @@ com.example.gazoapp
 - [ ] **Eliminar** (RF-04): `AlertDialog` de confirmación + cascada (incluye cargas y registros de precio).
 
 ### Fase 5 – Pantallas analíticas (2 días)
-- [ ] **Inicio / Panel** (RF-12): totales, activas, mín/máx/prom por combustible, mejor evaluada (solo con datos suficientes), accesos rápidos.
-- [ ] **Comparador de precios** (RF-06): tres combustibles, orden, extremos, empates mostrados, exclusión de inactivas/sin precio.
-- [ ] **Servicio** (RF-07): formulario 1–5, promedios por evaluación y general, conteo.
-- [ ] **Saturación** (RF-08): registro con fecha/hora, nivel por color + texto, antigüedad, leyenda "reporte manual, no en vivo".
-- [ ] **Calculadora** (RF-09, RF-10): carga simple y comparador de desvíos ordenado por costo total; mostrar supuestos y limitaciones (sin desgaste, peajes ni tiempo).
-- [ ] **Recomendaciones** (RF-11): selector de criterio + estación sugerida + explicación.
+- [x] **Inicio / Panel** (RF-12): totales, activas, mín/máx/prom por combustible, mejor evaluada (solo con datos suficientes), accesos rápidos.
+- [x] **Comparador de precios** (RF-06): tres combustibles, orden, extremos, empates mostrados, exclusión de inactivas/sin precio.
+- [x] **Servicio** (RF-07): lista de estaciones con promedio, detalle con historial de evaluaciones, formulario 1–5.
+- [x] **Saturación** (RF-08): lista/detalle con nivel por color + texto, antigüedad, leyenda "reporte manual, no en vivo", formulario de registro.
+- [x] **Calculadora** (RF-09, RF-10): carga simple y comparador de desvíos ordenado por costo total; muestra supuestos y limitaciones (sin desgaste, peajes ni tiempo).
+- [x] **Recomendaciones** (RF-11): selector de criterio + estación sugerida + explicación.
 
 ### Fase 6 – Reto de innovación: Mis cargas + Historial de precios (1 día)
 - [ ] **Mis cargas**: formulario (estación, combustible, litros, precio, fecha) con validaciones (litros y precio > 0); lista cronológica de cargas propias con costo total por registro y acumulado; bloqueo al llenarse la capacidad del arreglo.
