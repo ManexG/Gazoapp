@@ -200,7 +200,9 @@ fun GazoSmartApp(repositorio: GazoRepository) {
 
                         Pantalla.RECOMENDACIONES -> PantallaRecomendaciones(repositorio)
 
-                        Pantalla.MIS_CARGAS -> PantallaMisCargas()
+                        Pantalla.MIS_CARGAS -> PantallaMisCargas(
+                            repositorio = repositorio
+                        )
 
                         Pantalla.HISTORIAL_PRECIOS -> PantallaHistorialPrecios()
 

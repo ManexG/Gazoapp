@@ -930,14 +930,6 @@ private fun textoCriterio(criterio: CriterioRecomendacion): String = when (crite
 }
 
 @Composable
-fun PantallaMisCargas() {
-    PantallaEnConstruccion(
-        "Mis cargas",
-        "Aquí se registrarán tus abastecimientos ficticios y el gasto acumulado."
-    )
-}
-
-@Composable
 fun PantallaHistorialPrecios() {
     PantallaEnConstruccion(
         "Historial de precios",
