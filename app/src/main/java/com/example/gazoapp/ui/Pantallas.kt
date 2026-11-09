@@ -2,16 +2,23 @@
 package com.example.gazoapp.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.gazoapp.data.GazoRepository
 import com.example.gazoapp.logic.Estadisticas
 import com.example.gazoapp.logic.ResultadoExtremo
 import com.example.gazoapp.model.TipoCombustible
+import com.example.gazoapp.ui.components.EstadoVacio
 import com.example.gazoapp.ui.components.TarjetaGasolinera
 
 private fun textoExtremo(resultado: ResultadoExtremo?): String {
@@ -157,12 +164,73 @@ fun PantallaCatalogo() {
 }
 
 
+/** Comparador de precios (RF-06): orden ascendente, extremos y empates, excluyendo inactivas/sin precio. */
 @Composable
-fun PantallaComparador() {
-    PantallaEnConstruccion(
-        "Comparador de precios",
-        "Aquí se compararán los precios de regular, premium y diésel."
-    )
+fun PantallaComparador(repositorio: GazoRepository) {
+    var tipoSeleccionado by remember { mutableStateOf(TipoCombustible.REGULAR) }
+
+    val gasolineras = repositorio.gasolineras()
+    val minimo = Estadisticas.precioMinimo(gasolineras, tipoSeleccionado)
+    val maximo = Estadisticas.precioMaximo(gasolineras, tipoSeleccionado)
+    val elegibles = gasolineras
+        .filter { it.activa && it.precioPorTipo(tipoSeleccionado) != null }
+        .sortedBy { it.precioPorTipo(tipoSeleccionado) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("Comparador de precios", style = MaterialTheme.typography.headlineSmall)
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TipoCombustible.entries.forEach { tipo ->
+                FilterChip(
+                    selected = tipo == tipoSeleccionado,
+                    onClick = { tipoSeleccionado = tipo },
+                    label = { Text(tipo.etiqueta) }
+                )
+            }
+        }
+
+        if (elegibles.isEmpty()) {
+            EstadoVacio("No hay estaciones activas con precio de ${tipoSeleccionado.etiqueta} disponible")
+        } else {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(elegibles) { gasolinera ->
+                    val precio = gasolinera.precioPorTipo(tipoSeleccionado)!!
+                    val esMinimo = minimo?.estaciones?.contains(gasolinera) == true
+                    val esMaximo = maximo?.estaciones?.contains(gasolinera) == true
+
+                    Card(modifier = Modifier.fillMaxWidth()) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(gasolinera.nombre, style = MaterialTheme.typography.titleMedium)
+                                Text("$%.2f".format(precio), style = MaterialTheme.typography.titleMedium)
+                            }
+                            Text(gasolinera.municipio)
+                            if (esMinimo) {
+                                Text("Precio mínimo", color = MaterialTheme.colorScheme.primary)
+                            }
+                            if (esMaximo) {
+                                Text("Precio máximo", color = MaterialTheme.colorScheme.error)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable

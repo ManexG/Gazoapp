@@ -134,7 +134,7 @@ fun GazoSmartApp(repositorio: GazoRepository) {
 
                         Pantalla.CATALOGO -> PantallaCatalogo()
 
-                        Pantalla.COMPARADOR -> PantallaComparador()
+                        Pantalla.COMPARADOR -> PantallaComparador(repositorio)
 
                         Pantalla.SERVICIO -> PantallaServicio()
 
