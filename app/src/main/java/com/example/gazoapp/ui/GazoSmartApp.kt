@@ -204,7 +204,9 @@ fun GazoSmartApp(repositorio: GazoRepository) {
                             repositorio = repositorio
                         )
 
-                        Pantalla.HISTORIAL_PRECIOS -> PantallaHistorialPrecios()
+                        Pantalla.HISTORIAL_PRECIOS -> PantallaHistorialPrecios(
+                            repositorio = repositorio
+                        )
 
                         // FORMULARIO DE REGISTRO Y EDICIÓN
                         Pantalla.FORMULARIO -> {
