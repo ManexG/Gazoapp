@@ -58,13 +58,13 @@ com.example.gazoapp
 - [x] `DatosPrueba`: ~8–10 estaciones ficticias incluyendo A/B/C del README §1, un empate de mínimo, una inactiva, una sin evaluaciones, una con un solo combustible, más algunas cargas e historial de precio de ejemplo.
 
 ### Fase 2 – Lógica pura (1.5 días) — base de los casos de prueba
-- [ ] `Validaciones`: obligatorios, precios > 0, al menos un combustible, distancia ≥ 0, litros/rendimiento > 0, esperas ≥ 0.
-- [ ] `Estadisticas`: mín/máx/promedio por combustible (solo activas con precio), **lista de empates**, promedio de evaluación = media de (aten+limp+rap)/3 por evaluación, `null` si no hay evaluaciones (no cero).
-- [ ] `Costos`: costo de carga, distancia extra = ida×2, litros de desvío, costo extra, total.
-- [ ] `Recomendador`: 4 criterios (menor precio, menor costo estimado, mejor atención, menor espera) → resultado + texto explicativo, o "datos insuficientes".
-- [ ] `HistorialPrecios`: ordenar registros de un combustible/estación por fecha y clasificar la variación entre los dos últimos (sube/baja/sin cambio); costo total acumulado de "Mis cargas" por estación y global.
-- [ ] Clasificación de saturación y antigüedad del último reporte ("hace X min").
-- [ ] **Tests unitarios JUnit** de esta capa (cubren casos 3, 7, 8, 9, 12–14, 17 del README §11).
+- [x] `Validaciones`: obligatorios, precios > 0, al menos un combustible, distancia ≥ 0, litros/rendimiento > 0, esperas ≥ 0.
+- [x] `Estadisticas`: mín/máx/promedio por combustible (solo activas con precio), **lista de empates**, promedio de evaluación = media de (aten+limp+rap)/3 por evaluación, `null` si no hay evaluaciones (no cero).
+- [x] `Costos`: costo de carga, distancia extra = ida×2, litros de desvío, costo extra, total.
+- [x] `Recomendador`: 4 criterios (menor precio, menor costo estimado, mejor atención, menor espera) → resultado + texto explicativo, o "datos insuficientes".
+- [x] `HistorialPrecios`: ordenar registros de un combustible/estación por fecha y clasificar la variación entre los dos últimos (sube/baja/sin cambio); costo total acumulado de "Mis cargas" por estación y global.
+- [x] Clasificación de saturación y antigüedad del último reporte ("hace X min") — `Tiempo.descripcionAntiguedad`.
+- [x] **Tests unitarios JUnit** de esta capa (cubren casos 2, 3, 7, 8, 9, 10, 12–14, 17 del README §11; 45 tests, 0 fallos).
 
 ### Fase 3 – Esqueleto de UI y navegación (1 día)
 - [ ] `Scaffold` + `TopAppBar` + `ModalNavigationDrawer` con las 10 pantallas (8 base + Mis cargas + Historial de precios).
