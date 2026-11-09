@@ -1,3 +1,4 @@
+
 package com.example.gazoapp.data
 
 import com.example.gazoapp.model.CargaCombustible
@@ -9,17 +10,27 @@ import com.example.gazoapp.model.TipoCombustible
 import java.time.LocalDateTime
 
 /**
- * Concentra los arreglos de cada entidad. Los IDs son contadores monotónicos
- * (regla 2: nunca se reutilizan) y la eliminación de una gasolinera elimina en
- * cascada sus evaluaciones, reportes, cargas y registros de precio (regla 7).
+ * Concentra los arreglos de cada entidad.
+ *
+ * Los IDs son contadores monotónicos y nunca se reutilizan.
+ * Al eliminar una gasolinera también se eliminan sus registros relacionados.
  */
 class GazoRepository {
 
-    private val gasolineras = ArregloFijo<Gasolinera>(CAPACIDAD_GASOLINERAS)
-    private val evaluaciones = ArregloFijo<Evaluacion>(CAPACIDAD_EVALUACIONES)
-    private val reportes = ArregloFijo<ReporteSaturacion>(CAPACIDAD_REPORTES)
-    private val cargas = ArregloFijo<CargaCombustible>(CAPACIDAD_CARGAS)
-    private val registrosPrecio = ArregloFijo<RegistroPrecio>(CAPACIDAD_REGISTROS_PRECIO)
+    private val gasolineras =
+        ArregloFijo<Gasolinera>(CAPACIDAD_GASOLINERAS)
+
+    private val evaluaciones =
+        ArregloFijo<Evaluacion>(CAPACIDAD_EVALUACIONES)
+
+    private val reportes =
+        ArregloFijo<ReporteSaturacion>(CAPACIDAD_REPORTES)
+
+    private val cargas =
+        ArregloFijo<CargaCombustible>(CAPACIDAD_CARGAS)
+
+    private val registrosPrecio =
+        ArregloFijo<RegistroPrecio>(CAPACIDAD_REGISTROS_PRECIO)
 
     private var siguienteIdGasolinera = 1
     private var siguienteIdEvaluacion = 1
@@ -27,13 +38,62 @@ class GazoRepository {
     private var siguienteIdCarga = 1
     private var siguienteIdRegistroPrecio = 1
 
-    // --- Gasolineras (RF-01, RF-02, RF-03, RF-04) ---
+    // =====================================================
+    // VALIDACIÓN DE GASOLINERAS
+    // =====================================================
 
-    fun gasolineras(): List<Gasolinera> = gasolineras.aLista()
+    private fun datosGasolineraValidos(
+        nombre: String,
+        direccion: String,
+        municipio: String,
+        distanciaDesvioIdaKm: Double,
+        precioRegular: Double?,
+        precioPremium: Double?,
+        precioDiesel: Double?
+    ): Boolean {
 
-    fun buscarGasolinera(id: Int): Gasolinera? = gasolineras.buscarPorId(id) { it.id }
+        // Campos obligatorios.
+        if (nombre.isBlank()) return false
+        if (direccion.isBlank()) return false
+        if (municipio.isBlank()) return false
 
-    fun existeGasolinera(id: Int): Boolean = buscarGasolinera(id) != null
+        // Distancia válida.
+        if (!distanciaDesvioIdaKm.isFinite()) return false
+        if (distanciaDesvioIdaKm < 0) return false
+
+        // Debe existir al menos un precio.
+        val precios = listOf(
+            precioRegular,
+            precioPremium,
+            precioDiesel
+        ).filterNotNull()
+
+        if (precios.isEmpty()) return false
+
+        // Todos los precios registrados deben ser positivos y finitos.
+        if (precios.any { !it.isFinite() || it <= 0 }) {
+            return false
+        }
+
+        return true
+    }
+
+    // =====================================================
+    // GASOLINERAS
+    // =====================================================
+
+    fun gasolineras(): List<Gasolinera> =
+        gasolineras.aLista()
+
+    fun buscarGasolinera(id: Int): Gasolinera? =
+        gasolineras.buscarPorId(id) { it.id }
+
+    fun existeGasolinera(id: Int): Boolean =
+        buscarGasolinera(id) != null
+
+    // =====================================================
+    // AGREGAR GASOLINERA
+    // =====================================================
 
     fun agregarGasolinera(
         nombre: String,
@@ -47,28 +107,78 @@ class GazoRepository {
         activa: Boolean = true,
         fecha: LocalDateTime = LocalDateTime.now()
     ): Gasolinera? {
+
+        // Validar los datos antes de crear el objeto.
+        if (!datosGasolineraValidos(
+                nombre,
+                direccion,
+                municipio,
+                distanciaDesvioIdaKm,
+                precioRegular,
+                precioPremium,
+                precioDiesel
+            )
+        ) {
+            return null
+        }
+
+        // Crear la gasolinera.
         val gasolinera = Gasolinera(
             id = siguienteIdGasolinera,
-            nombre = nombre,
-            marca = marca,
-            direccion = direccion,
-            municipio = municipio,
+            nombre = nombre.trim(),
+            marca = marca.trim(),
+            direccion = direccion.trim(),
+            municipio = municipio.trim(),
             precioRegular = precioRegular,
             precioPremium = precioPremium,
             precioDiesel = precioDiesel,
             distanciaDesvioIdaKm = distanciaDesvioIdaKm,
             activa = activa
         )
-        if (!gasolineras.agregar(gasolinera)) return null
+
+        // El arreglo impide superar la capacidad de 30.
+        if (!gasolineras.agregar(gasolinera)) {
+            return null
+        }
+
+        // Incrementar ID solamente si se agregó correctamente.
         siguienteIdGasolinera++
 
-        precioRegular?.let { registrarPrecio(gasolinera.id, TipoCombustible.REGULAR, it, fecha) }
-        precioPremium?.let { registrarPrecio(gasolinera.id, TipoCombustible.PREMIUM, it, fecha) }
-        precioDiesel?.let { registrarPrecio(gasolinera.id, TipoCombustible.DIESEL, it, fecha) }
+        // Registrar historial de precios.
+        precioRegular?.let {
+            registrarPrecio(
+                gasolinera.id,
+                TipoCombustible.REGULAR,
+                it,
+                fecha
+            )
+        }
+
+        precioPremium?.let {
+            registrarPrecio(
+                gasolinera.id,
+                TipoCombustible.PREMIUM,
+                it,
+                fecha
+            )
+        }
+
+        precioDiesel?.let {
+            registrarPrecio(
+                gasolinera.id,
+                TipoCombustible.DIESEL,
+                it,
+                fecha
+            )
+        }
+
         return gasolinera
     }
 
-    /** Edita el mismo objeto sin duplicarlo ni cambiar su ID (RF-03). */
+    // =====================================================
+    // ACTUALIZAR GASOLINERA
+    // =====================================================
+
     fun actualizarGasolinera(
         id: Int,
         nombre: String,
@@ -82,51 +192,125 @@ class GazoRepository {
         activa: Boolean = true,
         fecha: LocalDateTime = LocalDateTime.now()
     ): Boolean {
+
+        // Comprobar que exista la gasolinera.
         val estacion = buscarGasolinera(id) ?: return false
+
+        // Validar los nuevos datos.
+        if (!datosGasolineraValidos(
+                nombre,
+                direccion,
+                municipio,
+                distanciaDesvioIdaKm,
+                precioRegular,
+                precioPremium,
+                precioDiesel
+            )
+        ) {
+            return false
+        }
+
+        // Guardar precios anteriores.
         val precioRegularAnterior = estacion.precioRegular
         val precioPremiumAnterior = estacion.precioPremium
         val precioDieselAnterior = estacion.precioDiesel
 
-        estacion.nombre = nombre
-        estacion.marca = marca
-        estacion.direccion = direccion
-        estacion.municipio = municipio
+        // Actualizar información.
+        estacion.nombre = nombre.trim()
+        estacion.marca = marca.trim()
+        estacion.direccion = direccion.trim()
+        estacion.municipio = municipio.trim()
+
         estacion.precioRegular = precioRegular
         estacion.precioPremium = precioPremium
         estacion.precioDiesel = precioDiesel
+
         estacion.distanciaDesvioIdaKm = distanciaDesvioIdaKm
         estacion.activa = activa
 
-        if (precioRegular != null && precioRegular != precioRegularAnterior) {
-            registrarPrecio(id, TipoCombustible.REGULAR, precioRegular, fecha)
+        // Registrar cambios de precios.
+        if (
+            precioRegular != null &&
+            precioRegular != precioRegularAnterior
+        ) {
+            registrarPrecio(
+                id,
+                TipoCombustible.REGULAR,
+                precioRegular,
+                fecha
+            )
         }
-        if (precioPremium != null && precioPremium != precioPremiumAnterior) {
-            registrarPrecio(id, TipoCombustible.PREMIUM, precioPremium, fecha)
+
+        if (
+            precioPremium != null &&
+            precioPremium != precioPremiumAnterior
+        ) {
+            registrarPrecio(
+                id,
+                TipoCombustible.PREMIUM,
+                precioPremium,
+                fecha
+            )
         }
-        if (precioDiesel != null && precioDiesel != precioDieselAnterior) {
-            registrarPrecio(id, TipoCombustible.DIESEL, precioDiesel, fecha)
+
+        if (
+            precioDiesel != null &&
+            precioDiesel != precioDieselAnterior
+        ) {
+            registrarPrecio(
+                id,
+                TipoCombustible.DIESEL,
+                precioDiesel,
+                fecha
+            )
         }
+
         return true
     }
 
-    /** Elimina la gasolinera y, en cascada, sus evaluaciones, reportes, cargas y registros de precio. */
+    // =====================================================
+    // ELIMINAR GASOLINERA
+    // =====================================================
+
     fun eliminarGasolinera(id: Int): Boolean {
-        val eliminada = gasolineras.eliminarSi { it.id == id } > 0
+
+        val eliminada =
+            gasolineras.eliminarSi { it.id == id } > 0
+
         if (eliminada) {
-            evaluaciones.eliminarSi { it.gasolineraId == id }
-            reportes.eliminarSi { it.gasolineraId == id }
-            cargas.eliminarSi { it.gasolineraId == id }
-            registrosPrecio.eliminarSi { it.gasolineraId == id }
+
+            // Eliminación en cascada.
+            evaluaciones.eliminarSi {
+                it.gasolineraId == id
+            }
+
+            reportes.eliminarSi {
+                it.gasolineraId == id
+            }
+
+            cargas.eliminarSi {
+                it.gasolineraId == id
+            }
+
+            registrosPrecio.eliminarSi {
+                it.gasolineraId == id
+            }
         }
+
         return eliminada
     }
 
-    // --- Evaluaciones de servicio (RF-07) ---
+    // =====================================================
+    // EVALUACIONES DE SERVICIO
+    // =====================================================
 
-    fun evaluaciones(): List<Evaluacion> = evaluaciones.aLista()
+    fun evaluaciones(): List<Evaluacion> =
+        evaluaciones.aLista()
 
     fun evaluacionesDe(gasolineraId: Int): List<Evaluacion> =
-        evaluaciones.aLista().filter { it.gasolineraId == gasolineraId }
+        evaluaciones.aLista().filter {
+            it.gasolineraId == gasolineraId
+        }
 
     fun agregarEvaluacion(
         gasolineraId: Int,
@@ -136,19 +320,43 @@ class GazoRepository {
         comentario: String? = null,
         fecha: LocalDateTime = LocalDateTime.now()
     ): Evaluacion? {
+
         if (!existeGasolinera(gasolineraId)) return null
-        val evaluacion = Evaluacion(siguienteIdEvaluacion, gasolineraId, atencion, limpieza, rapidez, comentario, fecha)
-        if (!evaluaciones.agregar(evaluacion)) return null
+
+        if (atencion !in 1..5) return null
+        if (limpieza !in 1..5) return null
+        if (rapidez !in 1..5) return null
+
+        val evaluacion = Evaluacion(
+            siguienteIdEvaluacion,
+            gasolineraId,
+            atencion,
+            limpieza,
+            rapidez,
+            comentario,
+            fecha
+        )
+
+        if (!evaluaciones.agregar(evaluacion)) {
+            return null
+        }
+
         siguienteIdEvaluacion++
+
         return evaluacion
     }
 
-    // --- Reportes de saturación (RF-08) ---
+    // =====================================================
+    // REPORTES DE SATURACIÓN
+    // =====================================================
 
-    fun reportes(): List<ReporteSaturacion> = reportes.aLista()
+    fun reportes(): List<ReporteSaturacion> =
+        reportes.aLista()
 
     fun reportesDe(gasolineraId: Int): List<ReporteSaturacion> =
-        reportes.aLista().filter { it.gasolineraId == gasolineraId }
+        reportes.aLista().filter {
+            it.gasolineraId == gasolineraId
+        }
 
     fun agregarReporteSaturacion(
         gasolineraId: Int,
@@ -156,19 +364,39 @@ class GazoRepository {
         esperaMinutos: Int,
         fechaHora: LocalDateTime = LocalDateTime.now()
     ): ReporteSaturacion? {
+
         if (!existeGasolinera(gasolineraId)) return null
-        val reporte = ReporteSaturacion(siguienteIdReporte, gasolineraId, vehiculosEnEspera, esperaMinutos, fechaHora)
-        if (!reportes.agregar(reporte)) return null
+        if (vehiculosEnEspera < 0) return null
+        if (esperaMinutos < 0) return null
+
+        val reporte = ReporteSaturacion(
+            siguienteIdReporte,
+            gasolineraId,
+            vehiculosEnEspera,
+            esperaMinutos,
+            fechaHora
+        )
+
+        if (!reportes.agregar(reporte)) {
+            return null
+        }
+
         siguienteIdReporte++
+
         return reporte
     }
 
-    // --- Mis cargas (mejora de innovación) ---
+    // =====================================================
+    // MIS CARGAS
+    // =====================================================
 
-    fun cargas(): List<CargaCombustible> = cargas.aLista()
+    fun cargas(): List<CargaCombustible> =
+        cargas.aLista()
 
     fun cargasDe(gasolineraId: Int): List<CargaCombustible> =
-        cargas.aLista().filter { it.gasolineraId == gasolineraId }
+        cargas.aLista().filter {
+            it.gasolineraId == gasolineraId
+        }
 
     fun agregarCargaCombustible(
         gasolineraId: Int,
@@ -177,21 +405,47 @@ class GazoRepository {
         precioPorLitro: Double,
         fecha: LocalDateTime = LocalDateTime.now()
     ): CargaCombustible? {
+
         if (!existeGasolinera(gasolineraId)) return null
-        val carga = CargaCombustible(siguienteIdCarga, gasolineraId, tipoCombustible, litros, precioPorLitro, fecha)
-        if (!cargas.agregar(carga)) return null
+        if (!litros.isFinite() || litros <= 0) return null
+        if (!precioPorLitro.isFinite() || precioPorLitro <= 0) return null
+
+        val carga = CargaCombustible(
+            siguienteIdCarga,
+            gasolineraId,
+            tipoCombustible,
+            litros,
+            precioPorLitro,
+            fecha
+        )
+
+        if (!cargas.agregar(carga)) {
+            return null
+        }
+
         siguienteIdCarga++
+
         return carga
     }
 
-    // --- Historial de precios (mejora de innovación) ---
+    // =====================================================
+    // HISTORIAL DE PRECIOS
+    // =====================================================
 
-    fun registrosPrecio(): List<RegistroPrecio> = registrosPrecio.aLista()
+    fun registrosPrecio(): List<RegistroPrecio> =
+        registrosPrecio.aLista()
 
-    fun registrosPrecioDe(gasolineraId: Int, tipoCombustible: TipoCombustible? = null): List<RegistroPrecio> =
-        registrosPrecio.aLista().filter {
-            it.gasolineraId == gasolineraId && (tipoCombustible == null || it.tipoCombustible == tipoCombustible)
+    fun registrosPrecioDe(
+        gasolineraId: Int,
+        tipoCombustible: TipoCombustible? = null
+    ): List<RegistroPrecio> {
+
+        return registrosPrecio.aLista().filter {
+            it.gasolineraId == gasolineraId &&
+                    (tipoCombustible == null ||
+                            it.tipoCombustible == tipoCombustible)
         }
+    }
 
     private fun registrarPrecio(
         gasolineraId: Int,
@@ -199,13 +453,30 @@ class GazoRepository {
         precio: Double,
         fecha: LocalDateTime
     ): RegistroPrecio? {
-        val registro = RegistroPrecio(siguienteIdRegistroPrecio, gasolineraId, tipoCombustible, precio, fecha)
-        if (!registrosPrecio.agregar(registro)) return null
+
+        val registro = RegistroPrecio(
+            siguienteIdRegistroPrecio,
+            gasolineraId,
+            tipoCombustible,
+            precio,
+            fecha
+        )
+
+        if (!registrosPrecio.agregar(registro)) {
+            return null
+        }
+
         siguienteIdRegistroPrecio++
+
         return registro
     }
 
+    // =====================================================
+    // CAPACIDADES
+    // =====================================================
+
     companion object {
+
         const val CAPACIDAD_GASOLINERAS = 30
         const val CAPACIDAD_EVALUACIONES = 300
         const val CAPACIDAD_REPORTES = 150

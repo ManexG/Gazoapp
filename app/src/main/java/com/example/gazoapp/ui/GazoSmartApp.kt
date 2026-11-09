@@ -1,3 +1,4 @@
+
 package com.example.gazoapp.ui
 
 import androidx.compose.foundation.layout.*
@@ -5,14 +6,25 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.gazoapp.data.GazoRepository
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GazoSmartApp() {
+fun GazoSmartApp(repositorio: GazoRepository) {
 
     var pantallaActual by remember {
         mutableStateOf(Pantalla.INICIO)
+    }
+
+    // ID de la gasolinera que se editará.
+    var gasolineraEditarId by remember {
+        mutableStateOf<Int?>(null)
+    }
+
+    // ID de la gasolinera cuyos detalles se consultarán.
+    var gasolineraDetalleId by remember {
+        mutableStateOf<Int?>(null)
     }
 
     fun abrirPantalla(pantalla: Pantalla) {
@@ -25,6 +37,7 @@ fun GazoSmartApp() {
 
     val scope = rememberCoroutineScope()
 
+    // PANTALLAS DEL MENÚ PRINCIPAL
     val opciones = listOf(
         Pantalla.INICIO,
         Pantalla.CATALOGO,
@@ -37,7 +50,9 @@ fun GazoSmartApp() {
 
     ModalNavigationDrawer(
         drawerState = estadoMenu,
+
         drawerContent = {
+
             ModalDrawerSheet {
 
                 Text(
@@ -54,7 +69,9 @@ fun GazoSmartApp() {
                         label = {
                             Text(pantalla.titulo)
                         },
+
                         selected = pantallaActual == pantalla,
+
                         onClick = {
                             pantallaActual = pantalla
 
@@ -62,6 +79,7 @@ fun GazoSmartApp() {
                                 estadoMenu.close()
                             }
                         },
+
                         modifier = Modifier.padding(
                             horizontal = 12.dp,
                             vertical = 4.dp
@@ -70,15 +88,21 @@ fun GazoSmartApp() {
                 }
             }
         }
+
     ) {
 
         Scaffold(
+
+            // BARRA SUPERIOR
             topBar = {
+
                 TopAppBar(
                     title = {
                         Text(pantallaActual.titulo)
                     },
+
                     navigationIcon = {
+
                         IconButton(
                             onClick = {
                                 scope.launch {
@@ -92,15 +116,24 @@ fun GazoSmartApp() {
                 )
             },
 
+            // BOTÓN PARA AGREGAR GASOLINERA
             floatingActionButton = {
+
                 if (pantallaActual == Pantalla.CATALOGO) {
+
                     ExtendedFloatingActionButton(
+
                         onClick = {
+                            gasolineraEditarId = null
+                            gasolineraDetalleId = null
+
                             abrirPantalla(Pantalla.FORMULARIO)
                         },
+
                         text = {
                             Text("Agregar gasolinera")
                         },
+
                         icon = {
                             Text(
                                 "+",
@@ -122,38 +155,116 @@ fun GazoSmartApp() {
                 Box(
                     modifier = Modifier.weight(1f)
                 ) {
+
                     when (pantallaActual) {
 
-                        Pantalla.INICIO -> PantallaInicio()
+                        Pantalla.INICIO -> {
+                            PantallaInicio()
+                        }
 
-                        Pantalla.CATALOGO -> PantallaCatalogo()
+                        // CATÁLOGO
+                        Pantalla.CATALOGO -> {
 
-                        Pantalla.COMPARADOR -> PantallaComparador()
+                            PantallaCatalogo(
+                                repositorio = repositorio,
 
-                        Pantalla.SERVICIO -> PantallaServicio()
+                                onEditar = { id ->
+                                    gasolineraEditarId = id
+                                    abrirPantalla(Pantalla.FORMULARIO)
+                                },
 
-                        Pantalla.SATURACION -> PantallaSaturacion()
+                                onDetalle = { id ->
+                                    gasolineraDetalleId = id
+                                    abrirPantalla(Pantalla.DETALLE)
+                                }
+                            )
+                        }
 
-                        Pantalla.CALCULADORA -> PantallaCalculadora()
+                        Pantalla.COMPARADOR -> {
+                            PantallaComparador()
+                        }
 
-                        Pantalla.RECOMENDACIONES -> PantallaRecomendaciones()
+                        Pantalla.SERVICIO -> {
+                            PantallaServicio()
+                        }
 
-                        Pantalla.FORMULARIO -> PantallaFormulario(
-                            onRegresar = {
-                                abrirPantalla(Pantalla.CATALOGO)
+                        Pantalla.SATURACION -> {
+                            PantallaSaturacion()
+                        }
+
+                        Pantalla.CALCULADORA -> {
+                            PantallaCalculadora()
+                        }
+
+                        Pantalla.RECOMENDACIONES -> {
+                            PantallaRecomendaciones()
+                        }
+
+                        // FORMULARIO DE REGISTRO Y EDICIÓN
+                        Pantalla.FORMULARIO -> {
+
+                            PantallaFormulario(
+                                repositorio = repositorio,
+
+                                gasolineraId = gasolineraEditarId,
+
+                                onGuardar = {
+                                    gasolineraEditarId = null
+                                    gasolineraDetalleId = null
+
+                                    abrirPantalla(Pantalla.CATALOGO)
+                                },
+
+                                onCancelar = {
+                                    gasolineraEditarId = null
+                                    gasolineraDetalleId = null
+
+                                    abrirPantalla(Pantalla.CATALOGO)
+                                }
+                            )
+                        }
+
+                        // DETALLES DE GASOLINERA
+                        Pantalla.DETALLE -> {
+
+                            val id = gasolineraDetalleId
+
+                            if (id != null) {
+
+                                PantallaDetalleGasolinera(
+                                    repositorio = repositorio,
+
+                                    gasolineraId = id,
+
+                                    onEditar = { idEditar ->
+                                        gasolineraEditarId = idEditar
+                                        abrirPantalla(Pantalla.FORMULARIO)
+                                    },
+
+                                    onEliminar = {
+                                        repositorio.eliminarGasolinera(id)
+
+                                        gasolineraDetalleId = null
+                                        gasolineraEditarId = null
+
+                                        abrirPantalla(Pantalla.CATALOGO)
+                                    },
+
+                                    onRegresar = {
+                                        gasolineraDetalleId = null
+
+                                        abrirPantalla(Pantalla.CATALOGO)
+                                    }
+                                )
+
+                            } else {
+
+                                PantallaInicio()
                             }
-                        )
+                        }
                     }
                 }
-
-                Text(
-                    text = "",
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(12.dp)
-                )
             }
         }
-
-
     }
 }

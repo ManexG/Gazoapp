@@ -2,14 +2,13 @@ package com.example.gazoapp.data
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 class ArregloFijo<T>(private val capacidad: Int) {
 
     private val elementos = arrayOfNulls<Any?>(capacidad)
 
-    var cantidad by mutableStateOf(0)
+    var cantidad by mutableIntStateOf(0)
         private set
 
     val lleno: Boolean
