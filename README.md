@@ -115,6 +115,8 @@ La estructura de clases está pensada para facilitar su integración en etapas p
 | Saturación | Últimos reportes y niveles |
 | Calculadora | Litros, rendimiento, desvíos y costos |
 | Recomendaciones | Selección de criterio y explicación |
+| Mis cargas | Registro y lista de abastecimientos ficticios propios, con costo total |
+| Historial de precios | Tendencia de precio por estación y combustible a lo largo del tiempo |
 
 Componentes: `ModalNavigationDrawer`, `Scaffold`, `TopAppBar`, `LazyColumn`, `Card`, `OutlinedTextField`, `Button`, `FloatingActionButton`, `AlertDialog`. Diseño orientado a accesibilidad, claridad y uso con una sola mano.
 
@@ -141,7 +143,15 @@ Componentes: `ModalNavigationDrawer`, `Scaffold`, `TopAppBar`, `LazyColumn`, `Ca
 
 `id`, `gasolineraId`, `vehiculosEnEspera` (≥ 0), `esperaMinutos` (≥ 0), `fechaHora`.
 
-> Evaluaciones y reportes se vinculan al **ID estable** de la gasolinera, nunca a su posición en el arreglo. Cada entidad tiene su propio arreglo.
+### Carga de combustible (mejora "Mis cargas")
+
+`id`, `gasolineraId`, `tipoCombustible`, `litros` (> 0), `precioPorLitro` (> 0), `fecha`. `costoTotal` se calcula como `litros × precioPorLitro`.
+
+### Registro de precio (mejora "Historial de precios")
+
+`id`, `gasolineraId`, `tipoCombustible`, `precio` (> 0), `fecha`. Se genera al dar de alta una estación o al modificar uno de sus precios.
+
+> Evaluaciones, reportes, cargas y registros de precio se vinculan al **ID estable** de la gasolinera, nunca a su posición en el arreglo. Cada entidad tiene su propio arreglo.
 
 ## 8. Fórmulas y algoritmos
 
@@ -180,7 +190,8 @@ Se separan **modelos**, **lógica de cálculo** y **componentes de interfaz**, e
 
 ```
 app/src/main/java/com/example/gazoapp/
-├── model/        Gasolinera, Evaluacion, ReporteSaturacion, enums
+├── model/        Gasolinera, Evaluacion, ReporteSaturacion, CargaCombustible,
+│                 RegistroPrecio, enums
 ├── data/         Arreglos de capacidad fija, repositorio, datos de prueba
 ├── logic/        Validaciones, estadísticas, costos, recomendador
 ├── ui/
@@ -216,17 +227,10 @@ app/src/main/java/com/example/gazoapp/
 
 ## 12. Reto de innovación
 
-Cada equipo implementa **al menos una** mejora adicional:
+**Mejoras elegidas:**
 
-- Historial de precios (tendencias locales)
-- Mis cargas (litros, costo y fecha de abastecimientos ficticios)
-- Perfil de vehículo (reutiliza el rendimiento)
-- Favoritos
-- Semáforo de precios (respecto al promedio del combustible)
-- Comparación ponderada (pesos para precio, atención y espera, con puntaje explicado)
-- Gráficas locales
-
-**Mejora elegida:** _por definir_
+- **Mis cargas:** registro de abastecimientos ficticios del usuario (estación, combustible, litros, precio y fecha), con costo total calculado y un historial personal de gasto.
+- **Historial de precios:** cada alta o cambio de precio de una estación genera un `RegistroPrecio` con fecha; permite mostrar la tendencia local (sube/baja) de un combustible en una estación a lo largo del tiempo.
 
 ## 13. Instalación y ejecución
 
